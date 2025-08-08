@@ -21,7 +21,6 @@ const userSchema = mongoose.Schema({
     password:{
         type: String,
         required: true,
-        minlength: 6,
         select:false
     },
     phoneNumber:{
@@ -54,9 +53,25 @@ const userSchema = mongoose.Schema({
         skills:[
             {type: String}
         ],
-        resumeURL:{
-            type: String,
-            trim: true
+        resumeData:{
+            resumeUrl:{
+                type:String,
+                trim: true,
+            },
+            publicId:{
+                type:String,
+                trim: true,
+            },
+            originalName:{
+                type: String,
+                trim: true,
+
+            },
+            uploadedAt:{
+                type: Date,
+                default: Date.now
+            }
+        
         },
         education:[{
             institution:{
@@ -93,6 +108,10 @@ userSchema.pre('save', async function(next) {
     this.password = await bcrypt.hash(this.password, 10);
     next();
 })
+
+userSchema.methods.validatePass = async function(enteredPassword) {
+    return await bcrypt.compare(enteredPassword, this.password);
+}
 
 const User = mongoose.model('User', userSchema);
 export default User;
