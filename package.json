@@ -1,0 +1,26 @@
+{
+  "name": "trackjob",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "dev": "concurrently \"npm run server\" \"npm run client\"",
+    "server": "cd backend && npm run start",
+    "client": "cd frontend && npm run dev"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/KevSun15/TrackJob.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/KevSun15/TrackJob/issues"
+  },
+  "homepage": "https://github.com/KevSun15/TrackJob#readme",
+  "devDependencies": {
+    "concurrently": "^9.2.0"
+  }
+}

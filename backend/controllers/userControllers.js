@@ -4,8 +4,14 @@ import generateToken from '../utils/generateToken.js';
 import { getDataUri } from '../utils/dataUri.js';
 import { cloudinary } from '../config/cloudinary.js';
 
+
+
+
+
+
+
 const registerUser = asyncHandler(async (req, res) => {
-    const {firstName, lastName, email, password} = req.body;
+    const {firstName, lastName, email, password, role} = req.body;
     
     
     const userExists = await User.findOne({email})
@@ -15,16 +21,14 @@ const registerUser = asyncHandler(async (req, res) => {
         throw new Error('User already exists');
     }
 
-    const newUser = await User.create({firstName, lastName, email, password})
+    const newUser = await User.create({firstName, lastName, email, password, role})
 
 
     if (newUser) {
         generateToken(res, newUser._id, newUser.email);
-        res.status(201).json({
-            _id: newUser._id,
-            name: newUser.name,
-            email: newUser.email
-        })
+        const { password, ...userWithoutPassword}= newUser.toObject()
+        res.status(201).json(userWithoutPassword);
+
     }
     else {
         res.status(400);
@@ -40,11 +44,8 @@ const loginUser = asyncHandler(async (req, res) => {
         
         if (user && (await user.validatePass(password))){
             generateToken(res, user._id, user.email);
-            res.status(201).json({
-            _id: user._id,
-            name: user.name,
-            email: user.email
-        })
+            const { password, ...userWithoutPassword}= user.toObject()
+            res.status(201).json(userWithoutPassword);
         } else {
             res.status(401);
             throw new Error('Invalid email or password');
@@ -66,65 +67,50 @@ const logoutUser = asyncHandler(async (req, res) => {
 
 const getProfile = asyncHandler(async (req, res) => {
 
-    res.status(200).json({ 
-        _id: req.user._id,
-        firstName: req.user.firstName,
-        lastName: req.user.lastName,
-        email: req.user.email,
-    })
+    const {...user} = req.user.toObject();
+    res.status(200).json(user);
 
 });
 
 
 const updateProfile = asyncHandler(async (req, res) => {
-    const { firstName, lastName, email, phoneNumber, location, role, profile} = req.body;
+    const { firstName, lastName, email, phoneNumber, profile, education} = req.body;
     const user = req.user;
-
     const newProfile = {};
 
     if (firstName) newProfile.firstName = firstName;
     if (lastName) newProfile.lastName = lastName;
     if (email) newProfile.email = email;
     if (phoneNumber) newProfile.phoneNumber = phoneNumber;
-    if (location) newProfile.location = location;
-    if (role) newProfile.role = role;
-
     let profileData = {};
     if (profile) {
         profileData = typeof profile === 'string' ? JSON.parse(profile) : profile;
+            console.log("hello3")
         if (profileData.bio){
             newProfile['profile.bio'] = profileData.bio;
         };
         if (profileData.skills){
         newProfile['profile.skills'] = profileData.skills;
         };
-        for (const [key, value] of Object.entries(profileData.education)) {
-        newProfile[`profile.education.${key}`] = value;
-        }
     };
-
-    if (req.file){
-        const fileUri = getDataUri(req.file);
-        const cloud = await cloudinary.uploader.upload(fileUri.content, {
-            public_id: `resume_${user._id}_${Date.now()}`,
-            folder: "resumes",
-            resource_type: 'auto'
-        });
-        newProfile['profile.resumeData.resumeUrl'] = cloud.secure_url;
-        newProfile['profile.resumeData.publicId'] = cloud.public_id;
-        newProfile['profile.resumeData.originalName'] = req.file.originalname;
+    let educationData = {};
+    if (education) {
+        educationData = typeof education === 'string' ? JSON.parse(education) : education;
+        newProfile['education.institution'] = educationData.institution;
+        newProfile['education.degree'] = educationData.degree;
+        newProfile['education.field'] = educationData.field;
+        newProfile['education.startDate'] = educationData.startDate;
+        newProfile['education.endDate'] = educationData.endDate;
     };
+    
 
+    console.log(newProfile)
     const updatedUser = await User.findByIdAndUpdate(user._id, newProfile, { new: true });
 
     if (updatedUser){
-        res.status(200).json({ 
-            _id: updatedUser._id,
-            firstName: updatedUser.firstName,
-            lastName: updatedUser.lastName,
-            email: updatedUser.email,
-            phoneNumber: updatedUser.phoneNumber
-        });
+        const { password, ...userWithoutPassword} = updatedUser.toObject();
+        console.log(userWithoutPassword);
+        res.status(200).json(userWithoutPassword);
     } else {
         res.status(500)
         throw new Error('Something went wrong');
@@ -134,10 +120,60 @@ const updateProfile = asyncHandler(async (req, res) => {
 });
 
 
+const uploadResume = asyncHandler(async(req,res) => {
+  const user = req.user;
+  let cloud;
+  if (req.file){
+    const fileUri = getDataUri(req.file);
+    cloud = await cloudinary.uploader.upload(fileUri.content, {
+            public_id: `resume_${user._id}`,
+            folder: "resumes",
+            resource_type: 'auto'
+        });
+        const updatedFields = {
+        "resume": cloud.secure_url
+      };
+    const newUser = await User.findByIdAndUpdate(user._id, updatedFields, { new: true });
+      console.log(newUser.resume)
+    if (newUser){
+      res.status(200).json({ resume: newUser.resume });
+    }
+  }
+    
+});
+
+
+const updateAvatar = asyncHandler(async(req,res) => {
+  const user = req.user;
+  let cloud;
+  if (req.file){
+    const fileUri = getDataUri(req.file);
+    cloud = await cloudinary.uploader.upload(fileUri.content, {
+            public_id: `avatar_${user._id}`,
+            folder: "avatars",
+            resource_type: 'auto'
+        });
+        const updatedFields = {
+        "avatarUrl": cloud.secure_url
+      };
+    const newUser = await User.findByIdAndUpdate(user._id, updatedFields, { new: true });
+
+    if (newUser){
+      res.status(200).json({ avatarUrl: newUser.avatarUrl });
+    }
+  }
+    
+});
+
+
 export {
     registerUser,
     loginUser,
     logoutUser,
     getProfile,
-    updateProfile
+    updateProfile,
+    uploadResume,
+    updateAvatar
 }
+
+

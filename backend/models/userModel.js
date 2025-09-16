@@ -26,23 +26,10 @@ const userSchema = mongoose.Schema({
     phoneNumber:{
         type: String,
     },
-    location: {
-        city: {
-            type: String,
-            trim: true
-        },
-        state:{
-            type: String,
-            trim: true
-        },
-        country: {
-            type: String,
-            trim: true
-        }
-    },
     role:{
         type: String,
         enum: ["applicant", "recruiter"],
+        required: true
     },
     profile:{
         bio:{
@@ -50,30 +37,16 @@ const userSchema = mongoose.Schema({
             trim: true,
             maxLength: 1000
         },
-        skills:[
-            {type: String}
-        ],
-        resumeData:{
-            resumeUrl:{
-                type:String,
-                trim: true,
-            },
-            publicId:{
-                type:String,
-                trim: true,
-            },
-            originalName:{
-                type: String,
-                trim: true,
-
-            },
-            uploadedAt:{
-                type: Date,
-                default: Date.now
-            }
-        
+        skills:{
+            type: String
         },
-        education:[{
+        company: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "Company"
+        },
+    },
+    resume: String,
+    education:{
             institution:{
                 type: String,
                 required: true,
@@ -94,8 +67,8 @@ const userSchema = mongoose.Schema({
             endDate:{
                 type: Date
             }
-        }]
-    }
+        },
+      avatarUrl: String,
 
 }, {
     timestamps: true,
