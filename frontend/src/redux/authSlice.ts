@@ -1,7 +1,7 @@
-import { createSlice } from '@reduxjs/toolkit';
+import { createSlice, type PayloadAction } from '@reduxjs/toolkit';
 
 type UserInfo = {
-  id: string;
+  _id: string;
   firstName: string;
   lastName: string;
   email: string;
@@ -13,8 +13,12 @@ type UserInfo = {
   };
   profile?: {
         bio?: string;
-        skills?: string;
-        company?: string;
+        company?: [string];
+        socialURL?: {
+          linkedin?: string;
+          github?: string;
+          website?: string;
+        };
   }
   resume?: string;
   education?:{
@@ -39,16 +43,26 @@ const authSlice = createSlice({
   name: 'auth',
   initialState,
   reducers: {
-    setCredentials: (state, action) => {
+    setCredentials: (state, action: PayloadAction<UserInfo>) => {
       state.userInfo = action.payload;
 
     },
+    setAvatar: (state, action: PayloadAction<string | undefined>) => {
+      if (state.userInfo) {
+        state.userInfo.avatarURL = action.payload;
+      }
+    },
+    setResume: (state, action: PayloadAction<string>) => {
+      if (state.userInfo) {
+        state.userInfo.resume = action.payload;
+      }
+    },  
     logout: (state) => {
       state.userInfo = null;
     },
   },
 });
 
-export const { setCredentials, logout } = authSlice.actions;
+export const { setCredentials, setAvatar, setResume, logout } = authSlice.actions;
 
 export default authSlice.reducer;

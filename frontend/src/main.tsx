@@ -7,7 +7,7 @@ import './index.css';
 import { RouterProvider } from 'react-router-dom'
 import { persistStore } from 'redux-persist'
 import { PersistGate } from 'redux-persist/integration/react'
-import { ToastContainer } from 'react-toastify';
+import { Toaster } from "@/components/ui/sonner"
 
 
 const persist = persistStore(store);
@@ -18,7 +18,7 @@ createRoot(document.getElementById('root')!).render(
 
     <Provider store={store}>
       <StrictMode>
-        <ToastContainer />
+        <Toaster />
         <PersistGate loading={null} persistor={persist}>
           <RouterProvider router ={router} />
         </PersistGate>

@@ -1,4 +1,5 @@
-import { apiSlice } from "./apiSlice";
+import type { get } from "http";
+import { apiSlice } from "../apiSlice";
 const USERS_URL = '/api/user';
 
 
@@ -10,15 +11,13 @@ export const userApiSlice = apiSlice.injectEndpoints({
         url: `${USERS_URL}/login`,
         method: 'POST',
         body: data,
-      }),
-      invalidatesTags: ['User'],
+      }), 
     }),
       logout: builder.mutation({
       query: () => ({
         url: `${USERS_URL}/logout`,
         method: 'POST',
       }),
-      invalidatesTags: ['User'],
     }),
     register: builder.mutation({
       query: (data) => ({
@@ -26,7 +25,6 @@ export const userApiSlice = apiSlice.injectEndpoints({
         method: 'POST',
         body: data,
       }),
-        invalidatesTags: ['User'],
     }),
     updateUser: builder.mutation({
       query: (data) => ({
@@ -35,7 +33,13 @@ export const userApiSlice = apiSlice.injectEndpoints({
           body: data,
           credentials: 'include',
       }),
-        invalidatesTags: ['User'],
+    }),
+    getCompanies: builder.mutation({
+      query: () => ({
+        url: `${USERS_URL}/companies`,
+        method: 'GET',
+        credentials: 'include',
+      }),
     }),
     uploadResume: builder.mutation({
       query: (file) => {
@@ -47,18 +51,9 @@ export const userApiSlice = apiSlice.injectEndpoints({
         body: formData,
         credentials: 'include',
         }
-
       },
-        invalidatesTags: ['User'],
     }),
-    getUser: builder.query({
-      query: () => ({
-        url: `${USERS_URL}/profile`,
-        method: 'GET',
-        credentials: 'include',
-      }),
-      providesTags: ['User'],
-    }),
+
     updateAvatar: builder.mutation({
       query: (file) => {
         const formData = new FormData();
@@ -69,9 +64,14 @@ export const userApiSlice = apiSlice.injectEndpoints({
         body: formData,
         credentials: 'include',
         }
-
       },
-        invalidatesTags: ['User'],
+    }),
+    deleteAvatar: builder.mutation({
+      query: () => ({
+        url: `${USERS_URL}/profile/avatar`,
+        method: 'DELETE',
+        credentials: 'include',
+      }),
     }),
   }),
 });
@@ -83,5 +83,6 @@ export const {
   useUpdateUserMutation,
   useUploadResumeMutation,
   useUpdateAvatarMutation,
-  useGetUserQuery
+  useDeleteAvatarMutation,
+  useGetCompaniesMutation,
 } = userApiSlice;

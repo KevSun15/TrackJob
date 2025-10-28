@@ -37,24 +37,24 @@ const userSchema = mongoose.Schema({
             trim: true,
             maxLength: 1000
         },
-        skills:{
-            type: String
-        },
-        company: {
+        company: [{
             type: mongoose.Schema.Types.ObjectId,
             ref: "Company"
-        },
+        }],
+        socialURL:{
+            linkedin: { type: String, trim: true },
+            github: { type: String, trim: true },
+            website: { type: String, trim: true }
+        }
     },
     resume: String,
     education:{
             institution:{
                 type: String,
-                required: true,
                 trim: true
             },
             degree:{
                 type: String,
-                required: true,
                 trim: true,
             },
             field:{

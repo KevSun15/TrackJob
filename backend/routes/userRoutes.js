@@ -1,5 +1,5 @@
 import express from 'express';
-import { registerUser, loginUser, logoutUser, getProfile, updateProfile, uploadResume, updateAvatar } from '../controllers/userControllers.js'
+import { registerUser, loginUser, logoutUser, getProfile, updateProfile, uploadResume, updateAvatar, deleteAvatar } from '../controllers/userControllers.js'
 import { protect } from '../middleware/auth.js';
 import { upload } from '../middleware/upload.js';
 
@@ -11,6 +11,6 @@ userRouter.post("/login", loginUser);
 userRouter.post("/logout", logoutUser);
 userRouter.route("/profile").get(protect, getProfile).put(protect, updateProfile);
 userRouter.route("/profile/resume").post(protect, upload.single('resume'), uploadResume);
-userRouter.route("/profile/avatar").put(protect, upload.single('avatar'), updateAvatar);
+userRouter.route("/profile/avatar").put(protect, upload.single('avatar'), updateAvatar).delete(protect, deleteAvatar);
 
 export {userRouter}

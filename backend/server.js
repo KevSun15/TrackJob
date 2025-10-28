@@ -1,7 +1,10 @@
 import express from 'express';
 import cookieParser from "cookie-parser";
 import dotenv from 'dotenv';
+import { applicationRouter } from './routes/applicationRoutes.js';
 import { userRouter } from './routes/userRoutes.js';
+import { jobRouter } from './routes/jobRoutes.js';
+import { companyRouter } from './routes/companyRoutes.js';
 import { notFound, errorHandler } from './middleware/errorMiddleware.js';
 import { connectDB } from "./config/db.js";
 import cors from 'cors';
@@ -24,6 +27,10 @@ app.get("/", (req, res) => {
 
 
 app.use("/api/user", userRouter);
+app.use("/api/jobs", jobRouter);
+app.use("/api/companies", companyRouter);
+app.use("/api/applications", applicationRouter);
+
 
 app.use(notFound);
 app.use(errorHandler);

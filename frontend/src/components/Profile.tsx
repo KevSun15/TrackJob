@@ -1,254 +1,195 @@
-import { useSelector } from 'react-redux';
-import { useDispatch } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
 import { type RootState } from '../redux/store';
-import { useState, useEffect,useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { TextArea, Avatar, Spinner, HoverCard } from '@radix-ui/themes';
-import { UploadIcon, Cross2Icon, CircleBackslashIcon } from '@radix-ui/react-icons';
-import { set, useForm, type SubmitHandler } from 'react-hook-form';
+import { Avatar, Spinner } from '@radix-ui/themes';
+import { GraduationCap, User, Phone, ArrowRight } from 'lucide-react';
+import { UploadIcon, GitHubLogoIcon, Link1Icon, LinkedInLogoIcon, EnvelopeClosedIcon } from '@radix-ui/react-icons';
+import { useForm } from 'react-hook-form';
 import NavBar from './Navbar';
 import DatePicker from "react-datepicker";
-import { useUpdateUserMutation, useUpdateAvatarMutation, useUploadResumeMutation } from '../redux/usersApiSlice';
-import { setCredentials } from '../redux/authSlice';
-import { toast } from 'react-toastify';
+import "react-datepicker/dist/react-datepicker.css";
+import { useUpdateUserMutation, useUpdateAvatarMutation, useDeleteAvatarMutation } from '../redux/apiSlices/usersApiSlice';
+import { setCredentials, setAvatar } from '../redux/authSlice';
+import { toast } from 'sonner';
 
 type FormFields = {
-  firstName: string;
-  lastName: string;
-  email: string;
-  password: string;
-  role: "applicant" | "recruiter";
-  phoneNumber: string;
-  profile: {
-    bio: string;
-    skills: string;
-  }
-  education: {
-      institution: string;
-      degree: string;
-      field: string;
-      startDate: Date | null;
-      endDate: Date | null;
-    }
-}
+  firstName: string; lastName: string; email: string; phoneNumber: string;
+  profile: { bio: string; socialURL: { linkedin: string; github: string; website: string; }};
+  education: { institution: string; degree: string; field: string; startDate: Date | null; endDate: Date | null; };
+};
+
+const inputStyle = "w-full px-4 py-2 bg-white border border-platinum rounded-lg focus:ring-2 focus:ring-orange-web/50 focus:border-orange-web outline-none transition-colors duration-200";
 
 export default function Profile() {
-
-  const { register, handleSubmit, formState: { errors }, reset, watch, resetField } = useForm<FormFields>();
+  const { register, handleSubmit, formState: { errors }, reset } = useForm<FormFields>();
   const { userInfo } = useSelector((state: RootState) => state.auth);
-  const [startDate, setStartDate] = useState<Date | null>(userInfo?.education?.startDate ?? null);
-  const [endDate, setEndDate] = useState<Date | null>(userInfo?.education?.endDate ?? null);
-  const [updateUser, {isLoading}] = useUpdateUserMutation();
-  const [updateAvatar, {isLoading: isUpdatingAvatar}] = useUpdateAvatarMutation();
-  const [uploadResume, {isLoading: isUploadingResume}] = useUploadResumeMutation();
-  
-  const Navigate = useNavigate();
-  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [startDate, setStartDate] = useState<Date | null>(null);
+  const [endDate, setEndDate] = useState<Date | null>(null);
+  const [updateUser, { isLoading }] = useUpdateUserMutation();
+  const [updateAvatar, { isLoading: isUpdatingAvatar }] = useUpdateAvatarMutation();
+  const [deleteAvatar] = useDeleteAvatarMutation();
+  const navigate = useNavigate();
   const dispatch = useDispatch();
 
   useEffect(() => {
     if (userInfo) {
-      reset({
-        firstName: userInfo.firstName,
-        lastName: userInfo.lastName,
-        email: userInfo.email,
-        role: userInfo.role,
+      const initialData = {
+        ...userInfo,
         phoneNumber: userInfo.phoneNumber || "",
-        profile: userInfo.profile || {},
-        education: userInfo.education || {},
-      });
+        profile: userInfo.profile || { bio: '', socialURL: { linkedin: '', github: '', website: '' } },
+        education: userInfo.education || { institution: '', degree: '', field: '' },
+      };
+      reset(initialData);
+      setStartDate(userInfo.education?.startDate ? new Date(userInfo.education.startDate) : null);
+      setEndDate(userInfo.education?.endDate ? new Date(userInfo.education.endDate) : null);
     }
   }, [userInfo, reset]);
 
-  const onSubmit = async(data:FormFields) => {
+  const onSubmit = async (data: FormFields) => {
     try {
-      const user = await updateUser({...data, education: {...data.education, startDate, endDate}}).unwrap();
+      const user = await updateUser({ ...data, education: { ...data.education, startDate, endDate } }).unwrap();
       dispatch(setCredentials(user));
       toast.success("Profile updated successfully");
-      Navigate("/");
-    } catch {
-      toast.error("Profile update failed");
-    }
-  }
+      navigate("/");
+    } catch (err) { toast.error("Profile update failed"); }
+  };
 
-  const avatarChange = async(e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files[0]){
-      try{
+  const avatarChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files?.[0]) {
+      try {
         const url = await updateAvatar(e.target.files[0]).unwrap();
-        const avatarUrl = url.avatarUrl;
-        dispatch(setCredentials({...userInfo, avatarURL: avatarUrl}));
+        dispatch(setAvatar(url.avatarUrl));
         toast.success("Avatar updated successfully");
-      } catch {
-        toast.error("Avatar upload failed");
-      }
+      } catch (err) { toast.error("Avatar upload failed"); }
     }
-  }
+  };
 
+  const removeAvatar = async () => {
+    try {
+      await deleteAvatar(null).unwrap();
+      dispatch(setAvatar(undefined)); 
+      toast.success("Avatar removed");
+    } catch (err) { toast.error("Failed to remove avatar"); }
+  };
 
   return (
-    <div className="bg-slate-100 min-h-screen">
+    <div className="bg-platinum min-h-screen">
       <NavBar />
-      <div className="max-w-4xl mx-auto p-8">
-        <div className="flex flex-col items-center mb-8">
-          <div className="w-22 h-22 border-4 border-gray-400 rounded-full flex items-center justify-center bg-gray-200 mb-3">
-            {!isUpdatingAvatar ? (<><Avatar
-            src={userInfo?.avatarURL}
-		        fallback={userInfo?.firstName.charAt(0).toUpperCase() || "U"}
-            radius="full"
-            color="gray"
-            size="6"/>
-            <input type="file" accept="image/png, image/jpeg" 
-              className="absolute w-20 h-20 opacity-0 cursor-pointer rounded-full"
-              onChange={avatarChange}/></>) : <Spinner size="2" />}
-          </div>
-          {userInfo?.avatarURL && <button onClick={() => dispatch(setCredentials({...userInfo, avatarURL: undefined}))} className="mb-2 text-sm hover:underline cursor-pointer">Remove Avatar</button>}
-          <div className="w-full bg-white border-2 border-gray-200 rounded-2xl p-8 shadow-lg">
-            <form className="space-y-6" onSubmit={handleSubmit(onSubmit)}>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    First Name
-                  </label>
-                  <input type="text" {...register("firstName", { required: "First name is required" })}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors" placeholder="Bob"/>
-                  {errors.firstName && (
-                    <div className="text-red-500 text-sm mt-1">{errors.firstName.message}</div>
-                  )}
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Last Name
-                  </label>
-                  <input type="text" {...register("lastName", { required: "Last Name is required" })}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors" placeholder="Ross"/>
-                  {errors.lastName && (
-                    <div className="text-red-500 text-sm mt-1">{errors.lastName.message}</div>
-                  )}
-                </div>
+      <main className="max-w-7xl mx-auto p-4 sm:p-6 lg:p-8">
+        <header className="text-center mb-10">
+          <h1 className="text-4xl font-bold text-oxford-blue mb-2">Profile Settings</h1>
+          <p className="text-oxford-blue/80">Manage your account information and preferences.</p>
+        </header>
+        <form onSubmit={handleSubmit(onSubmit)} className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          <aside className="lg:col-span-1 space-y-8">
+            <div className="bg-white border border-platinum rounded-xl p-6 shadow-sm text-center">
+              <div className="relative w-32 h-32 mx-auto mb-4 group">
+                {isUpdatingAvatar ? (
+                  <div className="w-full h-full flex items-center justify-center bg-slate-100 rounded-full"><Spinner size="3" /></div>
+                ) : (
+                  <>
+                    <Avatar src={userInfo?.avatarURL} fallback={userInfo?.firstName?.charAt(0).toUpperCase() || "U"} radius="full" size="8" className="w-32 h-32 shadow-md" color="gray"/>
+                    <label htmlFor="avatarInput" className="absolute inset-0 flex items-center justify-center bg-black/50 text-white opacity-0 group-hover:opacity-100 rounded-full cursor-pointer transition-opacity duration-300">
+                      <UploadIcon width={24} height={24} /><span className="ml-2 text-sm font-medium">Change</span>
+                    </label>
+                    <input id="avatarInput" type="file" accept="image/png, image/jpeg" className="hidden" onChange={avatarChange} />
+                  </>
+                )}
               </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Email Address
-                  </label>
-                  <input type="email" {...register("email", {required: "Email is required",
-                      validate: (value: string) => {
-                        if (!value.includes("@")) {
-                          return "Email must include @";
-                        }
-                        return true;
-                      },
-                    })}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors" placeholder="Bob.Ross@example.com"/>
-                  {errors.email && (
-                    <div className="text-red-500 text-sm mt-1">{errors.email.message}</div>
-                  )}
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Phone-Number
-                  </label>
-                  <input type="text" {...register("phoneNumber")}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors" placeholder=""/>
-                </div>
-              </div>
-              { userInfo?.role != "recruiter" && (
-              <>
-                <div className="space-y-4 border p-4 bg-gray-100 rounded-xl">
-                  <h3 className="text-lg font-medium text-gray-900">Education</h3>
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Institution
-                      </label>
-                      <input type="text" {...register("education.institution")} 
-                        className="w-full px-3 py-2 border border-gray-300 bg-white rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors" placeholder="University Name"/>
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Degree
-                      </label>
-                      <input type="text" {...register("education.degree")} 
-                        className="w-full px-3 py-2 border border-gray-300 bg-white rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors" placeholder="Bachelor's, Master's, etc."/>
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Field of Study
-                      </label>
-                      <input type="text" {...register("education.field")} className="w-full px-3 py-2 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors"
-                        placeholder="Computer Science, etc."/>
-                    </div>
-                  </div>
-                  <div className="flex justify-center gap-10">
-                    <label className="flex gap-3 items-center text-sm font-medium text-gray-700 mb-2">
-                      Start Date
-                      <DatePicker selected={startDate} onChange={(date) => setStartDate(date)} className="bg-white p-2 border w-40 border-gray-300 rounded-md"/>
-                    </label>
-                    <label className="flex gap-3 items-center text-sm font-medium text-gray-700 mb-2">
-                      End Date
-                      <DatePicker selected={endDate} onChange={(date) => setEndDate(date)} className="bg-white p-2 border w-40 border-gray-300 rounded-md"/>
-                    </label>
-                  </div>
-                </div>     
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Skills
-                    </label>
-                    <input type="text" {...register("profile.skills")} className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors"
-                      placeholder="React, TypeScript, Node.js"/>
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Resume
-                    </label>
-                    <div className="space-y-3">
-                      <label className="cursor-pointer inline-block">
-                        <span className="bg-gradient-to-br from-blue-400 to-indigo-400 px-4 py-3 rounded-lg text-center min-w-[150px] text-white font-semibold flex gap-2 items-center justify-center hover:brightness-110 transition-all">
-                          {isUploadingResume ? <Spinner size="2"/> : userInfo?.resume ? "Change Resume" : "Upload Resume"} 
-                          <UploadIcon className="w-4 h-4" />
-                        </span>
-                        <input type="file" accept=".pdf" onChange={(async(e: React.ChangeEvent<HTMLInputElement>) => {
-                            try {
-                              const url = await uploadResume(e.target.files?.[0]).unwrap();
-                              dispatch(setCredentials({...userInfo, resume: url.resume}));
-                              toast.success("Resume updated successfully");
-                            } catch {
-                              toast.error("Resume upload failed");
-                            }
-                        })} 
-                          className="hidden"/>
-                      </label>
-                      {userInfo?.resume && (
-                        <div className="flex items-center gap-2 text-sm text-gray-600">
-                          <a target="_blank" rel="noopener noreferrer" href={userInfo?.resume} className="max-w-50">Selected: <span className="hover:underline">{userInfo?.resume}</span></a>
-                          <button type="button" onClick={() => {dispatch(setCredentials({...userInfo, resume: undefined})); if (fileInputRef.current) {fileInputRef.current.value = '';}}} 
-                            className="p-1 border border-red-500 rounded-full hover:bg-red-50 transition-colors">
-                            <Cross2Icon color='red' width="12" height="12" />
-                          </button>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                </div>
-              </>)}
+              <h2 className="text-xl font-semibold text-oxford-blue">{userInfo?.firstName} {userInfo?.lastName}</h2>
+              <p className="text-sm text-oxford-blue/70 mb-4">{userInfo?.email}</p>
+              {userInfo?.avatarURL && <button type="button" onClick={removeAvatar} className="text-sm text-red-600 hover:underline cursor-pointer">Remove Avatar</button>}
+            </div>
+            <div className="bg-white border border-platinum rounded-xl p-6 shadow-sm">
+              <label htmlFor="bio" className="block text-md font-semibold text-oxford-blue mb-3">Bio</label>
+              <textarea id="bio" rows={5} placeholder="Tell us about yourself..." {...register("profile.bio")} className={`${inputStyle} resize-none`}/>
+            </div>
+          </aside>
+          <div className="lg:col-span-2 bg-white border border-platinum rounded-xl p-8 shadow-sm space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Bio
-                </label>
-                <TextArea radius="large" size="3" placeholder="Tell us about yourself, your experience, and career goals..."
-                  {...register("profile.bio")} className="min-h-[120px]"/>
+                <label className="flex items-center gap-2 text-sm font-medium text-oxford-blue mb-2"><User size={16}/>First Name</label>
+                <input type="text" {...register("firstName", { required: "First Name is required" })} className={inputStyle} placeholder="Bob"/>
+                {errors.firstName && <p className="text-red-500 text-sm mt-1">{errors.firstName.message}</p>}
               </div>
-              <div className="flex justify-center pt-6">
-                <button type="submit" className="px-8 py-3 bg-gradient-to-br from-blue-500 to-indigo-500 text-white rounded-lg font-semold hover:from-blue-600 hover:to-indigo-600 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-all transform hover:scale-105">
-                  Update Profile
-                </button>
+              <div>
+                <label className="flex items-center gap-2 text-sm font-medium text-oxford-blue mb-2"><User size={16}/>Last Name</label>
+                <input type="text" {...register("lastName", { required: "Last Name is required" })} className={inputStyle} placeholder="Ross"/>
+                {errors.lastName && <p className="text-red-500 text-sm mt-1">{errors.lastName.message}</p>}
               </div>
-            </form>
+              <div>
+                <label className="flex items-center gap-2 text-sm font-medium text-oxford-blue mb-2"><EnvelopeClosedIcon/>Email Address</label>
+                <input type="email" {...register("email", { required: "Email is required" })} className={inputStyle} placeholder="bob.ross@example.com"/>
+                {errors.email && <p className="text-red-500 text-sm mt-1">{errors.email.message}</p>}
+              </div>
+              <div>
+                <label className="flex items-center gap-2 text-sm font-medium text-oxford-blue mb-2"><Phone size={16}/>Phone Number</label>
+                <input type="tel" {...register("phoneNumber")} className={inputStyle} placeholder="(123) 456-7890"/>
+                {errors.phoneNumber && <p className="text-red-500 text-sm mt-1">{errors.phoneNumber.message}</p>}
+              </div>
+            </div>
+            {userInfo?.role === "applicant" && (
+              <div className="space-y-4 border border-platinum bg-oxford-blue/5 p-6 rounded-xl">
+                <div className="flex items-center gap-2">
+                  <GraduationCap className="text-oxford-blue" />
+                  <h3 className="text-lg font-semibold text-oxford-blue">Education</h3>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-oxford-blue mb-2">Institution</label>
+                    <input type="text" {...register("education.institution")} className={inputStyle} placeholder="University Name"/>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-oxford-blue mb-2">Degree</label>
+                    <input type="text" {...register("education.degree")} className={inputStyle} placeholder="Bachelor of Science"/>
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-oxford-blue mb-2">Field of Study</label>
+                  <input type="text" {...register("education.field")} className={inputStyle} placeholder="Computer Science"/>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-oxford-blue mb-2">Time Period</label>
+                  <div className="flex items-center gap-2">
+                    <DatePicker selected={startDate} onChange={(date) => setStartDate(date)} className={inputStyle} placeholderText="Start Date" />
+                    <ArrowRight size={16} className="text-gray-400"/>
+                    <DatePicker selected={endDate} onChange={(date) => setEndDate(date)} className={inputStyle} placeholderText="End Date" />
+                  </div>
+                </div>
+              </div>
+            )}
+            <div className="space-y-4 border border-platinum bg-oxford-blue/5 p-6 rounded-xl">
+              <div className="flex items-center gap-2">
+                  <Link1Icon />
+                  <h3 className="text-lg font-semibold text-oxford-blue">Social & Professional Links</h3>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <label className="flex items-center gap-2 text-sm font-medium text-oxford-blue mb-2"><LinkedInLogoIcon className="text-blue-700"/>LinkedIn</label>
+                  <input type="url" {...register("profile.socialURL.linkedin")} className={inputStyle} placeholder="https://linkedin.com/in/..."/>
+                </div>
+                {userInfo?.role === "applicant" 
+                  ? <div>
+                      <label className="flex items-center gap-2 text-sm font-medium text-oxford-blue mb-2"><GitHubLogoIcon/>GitHub</label>
+                      <input type="url" {...register("profile.socialURL.github")} className={inputStyle} placeholder="https://github.com/..."/>
+                    </div>
+                  : <div>
+                      <label className="flex items-center gap-2 text-sm font-medium text-oxford-blue mb-2"><Link1Icon/>Company Website</label>
+                      <input type="url" {...register("profile.socialURL.website")} className={inputStyle} placeholder="https://yourwebsite.com"/>
+                    </div>
+                }
+              </div>
+            </div>
+            <div className="flex justify-end pt-4">
+              <button type="submit" disabled={isLoading} className="px-8 py-3 bg-orange-web text-oxford-blue rounded-lg font-bold focus:ring-2 focus:ring-orange-web/50 focus:outline-none cursor-pointer hover:bg-orange-web/90 transition-all duration-200 flex items-center disabled:opacity-70 disabled:cursor-not-allowed">
+                {isLoading ? 'Saving...' : 'Update Profile'}
+                {isLoading && <Spinner className="ml-2"/>}
+              </button>
+            </div>
           </div>
-        </div>
-      </div>
+        </form>
+      </main>
     </div>
   );
 }

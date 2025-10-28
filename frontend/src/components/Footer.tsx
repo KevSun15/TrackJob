@@ -1,21 +1,26 @@
-import { LinkedInLogoIcon, GitHubLogoIcon } from "@radix-ui/react-icons"
+import { LinkedInLogoIcon, GitHubLogoIcon } from "@radix-ui/react-icons";
 
-
-
-export default function Footer(){
+export default function Footer() {
   return (
-    <footer className="bg-gray-500 pt-4 pb-4 px-15 fixed bottom-0 left-0 w-full flex gap-10 justify-center items-center">
-      <div>
-        <h1 className="font-bold text-xl text-white pr-7 "> TrackJob </h1>
-      </div>
-      <div className="flex gap-10 pl-7">
-        <a href="https://www.linkedin.com/in/kevin-sun-42ba57294/" className="bg-white rounded-xl p-1">
-          <LinkedInLogoIcon width={"25"} height={"25"}/>
-        </a>
-        <a href="https://github.com/KevSun15" className="bg-white rounded-xl p-1">
-          <GitHubLogoIcon width={"25"} height={"25"}/>
-        </a>
+    <footer className="bg-slate-900 shadow-inner">
+      <div className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row items-center justify-between gap-4">
+        <div className="text-sm text-slate-400 text-center md:text-left">
+          <p className="font-bold text-lg text-white">TrackJob</p>
+          <p>A professional Job Board Application</p>
+        </div>
+        <div className="flex items-center space-x-6">
+          <a href="https://www.linkedin.com/in/kevin-sun-42ba57294/" target="_blank" 
+            rel="noopener noreferrer" className="text-slate-400 hover:text-white transition-colors duration-300">
+            <span className="sr-only">LinkedIn</span>
+            <LinkedInLogoIcon width={"24"} height={"24"} />
+          </a>
+          <a href="https://github.com/KevSun15" target="_blank" rel="noopener noreferrer" 
+            className="text-slate-400 hover:text-white transition-colors duration-300">
+            <span className="sr-only">GitHub</span>
+            <GitHubLogoIcon width={"24"} height={"24"} />
+          </a>
+        </div>
       </div>
     </footer>
-  )
+  );
 }

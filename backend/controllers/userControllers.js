@@ -5,10 +5,10 @@ import { getDataUri } from '../utils/dataUri.js';
 import { cloudinary } from '../config/cloudinary.js';
 
 
-
-
-
-
+const parseJSON = (data) => {
+        if (!data) return {};
+        return typeof data === 'string' ? JSON.parse(data) : data;
+};
 
 const registerUser = asyncHandler(async (req, res) => {
     const {firstName, lastName, email, password, role} = req.body;
@@ -22,7 +22,6 @@ const registerUser = asyncHandler(async (req, res) => {
     }
 
     const newUser = await User.create({firstName, lastName, email, password, role})
-
 
     if (newUser) {
         generateToken(res, newUser._id, newUser.email);
@@ -74,50 +73,33 @@ const getProfile = asyncHandler(async (req, res) => {
 
 
 const updateProfile = asyncHandler(async (req, res) => {
-    const { firstName, lastName, email, phoneNumber, profile, education} = req.body;
+    const { firstName, lastName, email, phoneNumber, profile, education } = req.body;
     const user = req.user;
-    const newProfile = {};
 
-    if (firstName) newProfile.firstName = firstName;
-    if (lastName) newProfile.lastName = lastName;
-    if (email) newProfile.email = email;
-    if (phoneNumber) newProfile.phoneNumber = phoneNumber;
-    let profileData = {};
+    const updateData = {};
+    if (firstName) user.firstName = firstName;
+    if (lastName) user.lastName = lastName;
+    if (email) user.email = email;
+    if (phoneNumber) user.phoneNumber = phoneNumber;
     if (profile) {
-        profileData = typeof profile === 'string' ? JSON.parse(profile) : profile;
-            console.log("hello3")
-        if (profileData.bio){
-            newProfile['profile.bio'] = profileData.bio;
-        };
-        if (profileData.skills){
-        newProfile['profile.skills'] = profileData.skills;
-        };
-    };
-    let educationData = {};
-    if (education) {
-        educationData = typeof education === 'string' ? JSON.parse(education) : education;
-        newProfile['education.institution'] = educationData.institution;
-        newProfile['education.degree'] = educationData.degree;
-        newProfile['education.field'] = educationData.field;
-        newProfile['education.startDate'] = educationData.startDate;
-        newProfile['education.endDate'] = educationData.endDate;
-    };
-    
-
-    console.log(newProfile)
-    const updatedUser = await User.findByIdAndUpdate(user._id, newProfile, { new: true });
-
-    if (updatedUser){
-        const { password, ...userWithoutPassword} = updatedUser.toObject();
-        console.log(userWithoutPassword);
-        res.status(200).json(userWithoutPassword);
-    } else {
-        res.status(500)
-        throw new Error('Something went wrong');
-    };
-
-
+        const profileData = parseJSON(profile);
+        if (profileData.bio) user.profile.bio = profileData.bio;
+        if (profileData.socialURL) {
+            user.profile.socialURL = {
+                ...user.profile.socialURL,
+                ...profileData.socialURL
+            };
+        }
+      }
+    if (education) user.education = parseJSON(education);
+    const updatedUser = await job.save();
+    if (!updatedUser) {
+        return res.status(404).json({ error: 'User not found' });
+    }
+    const { password, ...userResponse } = updatedUser.toObject();
+    res.status(200).json(userResponse);
 });
+
 
 
 const uploadResume = asyncHandler(async(req,res) => {
@@ -165,6 +147,26 @@ const updateAvatar = asyncHandler(async(req,res) => {
     
 });
 
+const deleteAvatar = asyncHandler(async(req,res) => {
+  const user = req.user;
+
+  const cloud = await cloudinary.uploader.destroy(`avatars/avatar_${user._id}`);    
+  const updatedFields = {
+    "avatarUrl": null
+  };
+  const newUser = await User.findByIdAndUpdate(user._id, updatedFields, { new: true });
+  if (newUser){
+    res.status(200).json({ avatarUrl: newUser.avatarUrl });
+  }
+    
+});
+
+const getCompanies = asyncHandler(async (req, res) => {
+    const user = req.user;
+    await user.populate('company');
+    res.status(200).json(user.company);
+});
+
 
 export {
     registerUser,
@@ -173,7 +175,8 @@ export {
     getProfile,
     updateProfile,
     uploadResume,
-    updateAvatar
+    updateAvatar,
+    deleteAvatar,
 }
 
 

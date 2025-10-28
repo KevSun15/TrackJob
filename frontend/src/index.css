@@ -1,8 +1,17 @@
-@import '@radix-ui/themes/styles.css';
 @import "tailwindcss";
-
-
+@import '@radix-ui/themes/styles.css';
 @import "react-datepicker/dist/react-datepicker.css";
+
+
+@theme {
+  --color-black: #000000;
+  --color-oxford-blue: #14213d;
+  --color-orange-web: #fca311;
+  --color-platinum: #e5e5e5;
+  --color-white: #ffffff;
+}
+
+
 
 @keyframes float {
   0% {transform: translateY(0px) rotate(0deg);}
@@ -29,3 +38,4 @@
 .float-animation {
   animation: float 8s ease-in-out infinite;
 }
+
