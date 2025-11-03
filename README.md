@@ -7,23 +7,23 @@ It features separate, specialized interfaces for both user types — streamlinin
 
 ---
 
-## 🌟 Key Features
+## Key Features
 
-### 👨‍💼 For Applicants
--  **Advanced Job Search:** Search thousands of listings by job title, keyword, company, and location (including remote options).  
--  **Company Exploration:** Browse and research companies offering jobs.  
--  **Profile Management:** Create and update a professional profile, including skills and resume.  
+### For Applicants
+-  **Advanced Job Search:** Search thousands of listings by job title, keyword, company, and location.  
+-  **Company Exploration:** Browse and research companies and their job openings.  
+-  **Profile Management:** Create and update a professional profile.  
 -  **Application Tracking:** Apply for jobs and monitor the status of all submitted applications in a centralized dashboard.  
 
-### 🧑‍💼 For Recruiters
+### For Recruiters
 -  **Job Management:** Create, edit, and manage job listings with detailed requirements.  
 -  **Application Review:** View all applicants for their posted jobs.  
--  **Status Workflow:** Change the status of applications (e.g., Pending, Interview, Reject, Hire).  
+-  **Status Workflow:** Change the status of applications.  
 -  **Hiring Decisions:** Efficiently manage the hiring funnel from start to finish.  
 
 ---
 
-## 🛠️ Tech Stack
+## Tech Stack
 
 TrackJob utilizes a **modern MERN stack** architecture with a strong emphasis on **performance** and **maintainability** through **TypeScript** and **Redux Toolkit**.
 
@@ -33,7 +33,7 @@ TrackJob utilizes a **modern MERN stack** architecture with a strong emphasis on
 - **State Management:** Redux Toolkit (React-Redux)  
 - **Styling:** Tailwind CSS  
 - **Bundler:** Vite  
-- **Routing & Icons:** react-router-dom, @heroicons  
+- **Routing & Icons:** react-router-dom, @heroicons, lucid-icons, shadcn, react-radix
 
 ### ⚙️ Backend (Server)
 - **Runtime:** Node.js  
@@ -45,44 +45,32 @@ TrackJob utilizes a **modern MERN stack** architecture with a strong emphasis on
 
 ---
 
-## 🔑 Authentication (JWT Strategy)
+## Authentication (JWT)
 
 Authentication is secured using **JSON Web Tokens (JWT)**, ensuring controlled access for both applicants and recruiters.
 
 1. **Login:** Server authenticates credentials against MongoDB.  
 2. **Token Generation:** A JWT is created containing the user’s ID and role, signed using the `JWT_SECRET`.  
-3. **Access:** The client stores this token securely (e.g., in an HTTP-only cookie).  
+3. **Access:** The client stores this token securely in a cookie.  
 4. **Authorization:** For protected routes, the backend verifies the token and extracts the user’s role to allow or deny access.
 
 ---
 
-## 🧩 Getting Started
+## Getting Started
 
 Follow these steps to set up and run **TrackJob** locally.  
 The project is split into two directories: **frontend** and **backend**.
 
----
-
-### 1. Prerequisites
-
-Make sure you have the following installed:
-- [Node.js (LTS)](https://nodejs.org/)
-- npm, yarn, or pnpm
-- A MongoDB instance (local or [MongoDB Atlas](https://www.mongodb.com/atlas))
-
----
-
-### 2. Clone the Repository
+### 1. Clone the Repository
 
 ```bash
 git clone https://github.com/your-username/TrackJob.git
 cd TrackJob
 ```
 
-
 ---
 
-### 3. Environment Setup
+### 2. Environment Setup
 
 Create a `.env` file in the backend folder and fill in the following fields:
 
@@ -96,7 +84,7 @@ CLOUDINARY_API_KEY = ""
 CLOUD_NAME = ""
 ```
 
-### 4 Install Dependencies
+### 3. Install Dependencies
 
 Install dependencies for both the **backend** and **frontend**:
 
@@ -112,7 +100,7 @@ npm install
 
 ---
 
-#### ▶️ Run Both (Recommended for Development)
+#### 4. Running TrackJob locally
 
 You can start both the **client** and **server** simultaneously or independently.
 From the project root (`/TrackJob`):
@@ -141,7 +129,7 @@ npm run dev
 - **Server (Backend):** http://localhost:5001 
 
 ---
-## 🧪 Project Structure
+## Project Structure
 
 TrackJob/
 ├── backend/ # Express + MongoDB API
