@@ -30,7 +30,6 @@ export default function Login() {
       }
     }
 
-    // Consistent input styling for a professional look
     const inputStyle = "w-full pl-10 pr-4 py-3 border border-platinum rounded-lg focus:ring-1 focus:ring-oxford-blue focus:border-oxford-blue outline-none transition-colors duration-200";
 
     return(
@@ -57,23 +56,14 @@ export default function Login() {
             <form className="space-y-5" onSubmit={handleSubmit(onSubmit)}>
               <div className="relative">
                 <EnvelopeClosedIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400"/>
-                <input 
-                  type="email" 
-                  {...register("email", { required: "Email is required", pattern: { value: /^\S+@\S+$/i, message: "Invalid email address" }})}
-                  className={inputStyle}
-                  placeholder="you@example.com"
-                />
+                <input type="email" {...register("email", { required: "Email is required", pattern: { value: /^\S+@\S+$/i, message: "Invalid email address" }})}
+                  className={inputStyle} placeholder="you@example.com"/>
                 {errors.email && (<p className="text-red-500 text-sm mt-1">{errors.email.message}</p>)}
               </div>
-
               <div className="relative">
                 <LockClosedIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400"/>
-                <input 
-                  type="password" 
-                  {...register("password", { required: "Password is required" })}
-                  className={inputStyle}
-                  placeholder="••••••••"
-                />
+                <input type="password" {...register("password", { required: "Password is required" })}
+                  className={inputStyle} placeholder="••••••••"/>
                 {errors.password && (<p className="text-red-500 text-sm mt-1">{errors.password.message}</p>)}
               </div>
               <button type="submit" disabled={isLoading} className="w-full flex justify-center items-center bg-orange-web py-3 rounded-lg font-bold hover:bg-orange-web/90 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-orange-web/50 disabled:opacity-70">
