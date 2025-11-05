@@ -1,58 +1,63 @@
-# TrackJob
+<p align="center">
+<img width="300" height="167" alt="TrackJob-Logo" src="https://github.com/user-attachments/assets/8d24bb3e-e35a-4e59-9fc5-5c10c5975169" />
+</p>
 
-**TrackJob: The Modern MERN Job Board Platform**
+# TrackJob  
 
-TrackJob is a full-stack, **MERN-based job board application** designed to efficiently connect job applicants with recruiters.  
-It features separate, specialized interfaces for both user types — streamlining the entire hiring process from **job posting** to **application management** and **final decision-making**.
+
+### TrackJob: A Modern MERN Job Board
+
+TrackJob is a full-stack MERN job board built from the ground up to streamline the hiring process for everyone involved. 
+It provides two distinct, specialized interfaces—one for job seekers and one for recruiters—to ensure a seamless and efficient experience from job posting to final hire. 
 
 ---
 
 ## Key Features
 
-### For Applicants
--  **Advanced Job Search:** Search thousands of listings by job title, keyword, company, and location.  
--  **Company Exploration:** Browse and research companies and their job openings.  
--  **Profile Management:** Create and update a professional profile.  
--  **Application Tracking:** Apply for jobs and monitor the status of all submitted applications in a centralized dashboard.  
+### For Job Seekers
+-  **Discover Your Perfect Role:** Use our advanced search to find thousands of listings by title, keyword, company, or location.
+-  **Research & Connect with Companies:** Browse detailed company profiles to learn about their culture and available opportunities.
+-  **Build Your Professional Profile:** Create and maintain a compelling profile to showcase your skills and experience to recruiters.  
+-  **Track Your Applications with Confidence:** Monitor the status of all your submitted applications (e.g., "Viewed," "In Progress") from a single, centralized dashboard.
 
-### For Recruiters
--  **Job Management:** Create, edit, and manage job listings with detailed requirements.  
--  **Application Review:** View all applicants for their posted jobs.  
--  **Status Workflow:** Change the status of applications.  
--  **Hiring Decisions:** Efficiently manage the hiring funnel from start to finish.  
+### For Recruiters & Hiring Managers
+-  **Attract the Right Talent:** Easily create, edit, and manage detailed job listings for each of your companies to reach qualified candidates.
+-  **Review Candidates in One Place:** View and organize all applicants for your posted jobs in a simple, intuitive interface.
+-  **Streamline Your Hiring Pipeline: ** Efficiently manage your candidates by updating their application status (e.g., "Pending", "Rejected", "Hired").  
+-  **A Dashboard for Decision-Making:** Manage your entire hiring funnel from one powerful dashboard, from initial posting to final decision.
 
 ---
 
 ## Tech Stack
 
-TrackJob utilizes a **modern MERN stack** architecture with a strong emphasis on **performance** and **maintainability** through **TypeScript** and **Redux Toolkit**.
+TrackJob is built on a powerful and modern MERN stack, with a strong emphasis on performance, scalability, and maintainability. The frontend and UI/UX uses Typescript with React framework while the backend uses Javascript/Node.js with Express.js Framework. MongoDB is used as the database with tailwindcss for styling. The REST API in the backend is called through RTK query in the frontend. 
 
-### 🖥️ Frontend (Client)
+### Frontend (Client)
 - **Language:** TypeScript  
 - **Framework:** React  
 - **State Management:** Redux Toolkit (React-Redux)  
-- **Styling:** Tailwind CSS  
-- **Bundler:** Vite  
-- **Routing & Icons:** react-router-dom, @heroicons, lucid-icons, shadcn, react-radix
+- **Styling:** Tailwind CSS, shadcn/ui, Radix, lucid-icons  
+- **Routing and Tooling:** Vite, React Router, RTK query
 
-### ⚙️ Backend (Server)
-- **Runtime:** Node.js  
+### Backend (Server)
+- **Runtime:** Node.js, Javascript  
 - **Framework:** Express.js  
-- **Database:** MongoDB  
-- **ODM:** Mongoose  
-- **Security:** JSON Web Tokens (JWT)  
-- **Storage:** Cloudinary  
+- **Database:** MongoDB with Mongoose (ODM)
+- **Security & Auth:** JSON Web Tokens (JWT)  
+- **Assests** Cloudinary (Avatar and Resumes)
 
 ---
 
-## Authentication (JWT)
+## Secure, Role-Based Authentication
 
-Authentication is secured using **JSON Web Tokens (JWT)**, ensuring controlled access for both applicants and recruiters.
+Authentication is secured using JSON Web Tokens (JWT) to ensure that all user data is protected and access is role-appropriate. The system clearly distinguishes between Job Seekers and Recruiters, providing a secure and specialized experience for each.
 
-1. **Login:** Server authenticates credentials against MongoDB.  
-2. **Token Generation:** A JWT is created containing the user’s ID and role, signed using the `JWT_SECRET`.  
-3. **Access:** The client stores this token securely in a cookie.  
-4. **Authorization:** For protected routes, the backend verifies the token and extracts the user’s role to allow or deny access.
+**Authentication Flow**
+
+1. **Login & Verification:** During registration the password is encrypted and stored in MongoDB as the server generates a JWT token based on the user's id and role. User Credentials is validated against MongoDB during login.
+2. **Token Generation:** Upon success, the server generates a secure, signed JWT containing the user's ID and their specific role (e.g., 'applicant' or 'recruiter').  
+3. **Secure Storage:** This token is sent to the client and stored securely in an HTTP-only cookie.  
+4. **Authorization:** For every subsequent request on a protected route, the client automatically sends the token. Backend middleware verifies the token's signature and checks the user's role, granting or-denying access as appropriate.
 
 ---
 
