@@ -23,7 +23,7 @@ It provides two distinct, specialized interfaces—one for job seekers and one f
 ### For Recruiters & Hiring Managers
 -  **Attract the Right Talent:** Easily create, edit, and manage detailed job listings for each of your companies to reach qualified candidates.
 -  **Review Candidates in One Place:** View and organize all applicants for your posted jobs in a simple, intuitive interface.
--  **Streamline Your Hiring Pipeline: ** Efficiently manage your candidates by updating their application status (e.g., "Pending", "Rejected", "Hired").  
+-  **Streamline Your Hiring Pipeline:** Efficiently manage your candidates by updating their application status (e.g., "Pending", "Rejected", "Hired").  
 -  **A Dashboard for Decision-Making:** Manage your entire hiring funnel from one powerful dashboard, from initial posting to final decision.
 
 ---
