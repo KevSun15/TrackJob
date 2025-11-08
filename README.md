@@ -136,6 +136,7 @@ npm run dev
 ---
 ## Project Structure
 
+``` bash
 TrackJob/
 ├── backend/ # Express + MongoDB API
 │ ├── models/ 
@@ -159,6 +160,7 @@ TrackJob/
 ├── package.json
 ├── index.html
 └── README.md
+```
 
 
 
