@@ -69,7 +69,7 @@ The project is split into two directories: **frontend** and **backend**.
 ### 1. Clone the Repository
 
 ```bash
-git clone https://github.com/your-username/TrackJob.git
+git clone https://github.com/KevSun15/TrackJob.git
 cd TrackJob
 ```
 
